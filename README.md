@@ -10,4 +10,5 @@ Copy this software to the *Web server root dir* and upload music or create a sym
 ## Creating a music database
 You have to run it in Linux bash and you have to installed **exiftool**
 > ./scanMusic.sh
+
 *You can run this script with a cron*
