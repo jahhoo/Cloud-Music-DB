@@ -188,7 +188,11 @@ if(document.documentElement.lang=="cs") {
       		<br>
       	</td>
 	<td data-label="{tableHeader['title']}" on:click={() => play(row.SourceFile, row.Folder, row.Title, row.Artist)} style="cursor:pointer;">{getTitle(row.Title, row.SourceFile)}</td>
-	<td data-label="{tableHeader['artist']}">{row.Artist}</td>
+	<td data-label="{tableHeader['artist']}">
+		{#if row.Artist && typeof row.Artist!=="undefined"}
+			{row.Artist}
+		{/if}
+	</td>
 	<td data-label="BPM">{getBPM(row.BeatsPerMinute)}</td>
 	<td data-label="{tableHeader['genre']}">{row.Genre}</td>
 	<td data-label="{tableHeader['duration']}">
