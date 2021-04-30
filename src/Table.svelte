@@ -163,6 +163,7 @@
 	    height:200px;
 	    margin-bottom:100px;
     }
+    td { min-height:20px; }
   }
 </style>
 

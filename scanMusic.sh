@@ -4,6 +4,7 @@
 #Author Jan Holomek (jahhoo@gmail.com)
 
 bpmAnalyze=false
+setChmode=false
 musicdir='music'
 dbFile='db.json'
 
@@ -20,6 +21,7 @@ analyze() {
 	for f in *; do 
 	  filetype=`file -b --mime-type "$f" `
 	  if [ "$filetype" == "audio/mpeg" ] || [ "$filetype" == "audio/x-m4a" ]; then
+	  	if $setChmode ; chmod 775 "$f" ; fi
 		if $bpmAnalyze ; then bpm-tag "$f" ; fi
 		metadata=`exiftool -Title -Artist -Genre -BeatsPerMinute -Duration -DateTimeOriginal -ContentCreateDate -FileModifyDate -json "$f"`
 		json="${metadata/$musicdir/''}"
@@ -27,7 +29,9 @@ analyze() {
 		thisFolder="${thisFolder/$SOURCE/''}"
 		thisFolder="${thisFolder/'/'$musicdir'/'/''}"
 		thisFolder="${thisFolder/'/'$musicdir/''}"
-		json="${json/'"SourceFile'/'"Folder":"'$thisFolder'","SourceFile'}"
+		if [ ! -z "$thisFolder" ]; then
+			json="${json/'"SourceFile'/'"Folder":"'$thisFolder'","SourceFile'}"
+		fi
 		json="${json/'}]'/'}'}"
 		json="${json/'[{'/'{'}"
 		if $first; then

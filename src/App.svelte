@@ -1,6 +1,7 @@
 <script>
 //NAS Music DB
 //Author Jan Holomek (jahhoo@gmail.com)
+  import { onMount } from "svelte";
   import Table, { Pagination, Row, Search, Sort } from "./Table.svelte";
   import Limit from "./Limit.svelte";
   import RangeSlider from "./RangeSlider.svelte";
@@ -31,14 +32,22 @@
   export let File="";
   export let IndexPlayed=-1;
   export let paused=false;
-
-  async function load(_page) {
+  let loadData;
+  
+ 
+  async function init() {
+  	let loadFetch = await fetch(musicDb);
+    	loadData=await loadFetch.json()
+  }
+ 
+   async function load(_page) {
     loading = true;
-    const load = await fetch(musicDb);
-    const data = await getData(await load.json(), _page, pageSize, text, sorting, bpmFrom, bpmTo);
-    rows = data.rows;
-    rowsCount = data.rowsCount;
-    loading = false;
+    if(loadData) {
+	    const data = await getData(loadData, _page, pageSize, text, sorting, bpmFrom, bpmTo);
+	    rows = data.rows;
+	    rowsCount = data.rowsCount;
+	    loading = false;
+    }
   }
 
   function onCellClick(row) {
@@ -46,7 +55,8 @@
   }
   
   function getLink(f,fol) {
-  	if(fol) { fol+="/"; }
+  	if(fol && typeof fol!=="undefined" && fol!="NaN") { fol+="/"; }
+  	else { fol=""; }
   	return musicFolder+"/"+fol+f;
   }
   
@@ -104,10 +114,10 @@
  }
  
  function getBPM(bpm) {
- 	if(typeof bpm==="undefined" || !bpm || bpm=="NaN" || bpm==199) { return "?"; }
+ 	if(typeof bpm==="undefined" || !bpm || bpm=="NaN" || bpm==199) { return ""; }
 	else {
 		let b=Math.round(parseInt(bpm));
-		if(typeof b==="undefined" || !b || b=="NaN") { return "?"; }
+		if(typeof b==="undefined" || !b || b=="NaN") { return ""; }
 		return b;
 	}
  }
@@ -118,13 +128,17 @@
  			let cd=CreateDate.split(":");
  			return cd[0];
  		}
- 		return "?"; 
+ 		return ""; 
  	}
  	return parseInt(y);
  }
   
+onMount(() => {
+	init();
+});
+
 $: {
-	load(page, pageSize, bpmFrom, bpmTo);
+	load(page, loadData, pageSize, bpmFrom, bpmTo);
 }
 
 let tableHeader=[];
@@ -142,7 +156,7 @@ if(document.documentElement.lang=="cs") {
   </div>
   <thead slot="head">
     <tr>
-      <th>&nbsp;</th>
+      <th class="actionTh">&nbsp;</th>
       <th>
         {tableHeader['title']}
         <Sort key="Title" on:sort={onSort} />
@@ -194,7 +208,11 @@ if(document.documentElement.lang=="cs") {
 		{/if}
 	</td>
 	<td data-label="BPM">{getBPM(row.BeatsPerMinute)}</td>
-	<td data-label="{tableHeader['genre']}">{row.Genre}</td>
+	<td data-label="{tableHeader['genre']}">
+		{#if typeof row.Genre !=="undefined" && row.Genre && row.Genre!="None"} 
+			{row.Genre}
+		{/if}
+	</td>
 	<td data-label="{tableHeader['duration']}">
 		{#if typeof row.Duration !=="undefined" && row.Duration} 
 			{row.Duration.replace(" (approx)", "")}
@@ -214,10 +232,13 @@ if(document.documentElement.lang=="cs") {
 <style>
 .icon { width:30px; float:left; padding-right:10px; }
 th { min-width:48px; }
+.actionTh { width:90px; }
 
   @media screen and (max-width: 767px) {
     .action {
       min-height:30px;
     }
+    .actionTh { width:auto; }
+
  }
 </style>

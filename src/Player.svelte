@@ -44,12 +44,20 @@
 		paused = false;
 	}
 	
+	function getTitle(t,f) {
+	 	if(!t) { 
+	 		let f2=f.split("/");
+	 		return f2[(f2.length-1)].replace(".mp3","");
+	 	}
+	 	return t; 
+	 }
+	
 	function nextSong() {
 		IndexPlayed+=1;
 		let fol=rows[IndexPlayed]['Folder'];
 		if(fol) { fol+="/"; }
 		File=musicFolder+"/"+fol+rows[IndexPlayed]['SourceFile'];
-		Title=rows[IndexPlayed]['Title'];
+		Title=getTitle(rows[IndexPlayed]['Title'],rows[IndexPlayed]['SourceFile']);
 		Artist=rows[IndexPlayed]['Artist'];
 	}
 	
@@ -185,10 +193,10 @@ $: {
 		opacity: 0;
 	}
 	
-	.icon { width:40px; float:left; padding-right:10px; }
+	.icon { width:45px; float:left; padding-right:10px; }
 	
 	@media screen and (max-width: 767px) {
 		.logo, .plusMinute, .song-slider, .volume { display:none; }
-		.player-container { height: 100px; }
+		.player-container { height: 110px; }
 	}
 </style>
