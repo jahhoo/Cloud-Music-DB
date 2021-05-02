@@ -54,6 +54,7 @@
 	
 	function nextSong() {
 		IndexPlayed+=1;
+		currentTime=0;
 		let fol=rows[IndexPlayed]['Folder'];
 		if(fol) { fol+="/"; }
 		File=musicFolder+"/"+fol+rows[IndexPlayed]['SourceFile'];
@@ -95,7 +96,7 @@ $: {
 
 <div use:keyboard={{shortcut}} class="player-container" tabindex={0}>
 	<div class="song-info">
-		<img src="player.png" alt="{Title}" class="logo" />
+		<img src="player.png" alt="{Title}" class="logo" width="100%" height="100%" />
 		<div>
 			<h4>{Title}</h4>
 			<p>{Artist}</p>	
@@ -164,7 +165,7 @@ $: {
 	.song-info {
 		display: flex;
 		justify-content: space-between;
-		width:500px;
+		max-width:750px;
 		min-width:300px;
 	}
 	

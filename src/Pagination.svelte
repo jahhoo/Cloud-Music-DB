@@ -11,11 +11,14 @@
   const dispatch = createEventDispatcher();
   const stateContext = getContext("state");
 
-  export let buttons = [-2, -1, 0, 1, 2];
+  export let buttons = [-3, -2, -1, 0, 1, 2, 3];
   export let count;
   export let page = 0;
   export let pageSize;
   export let serverSide = false;
+  
+  if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){ buttons = [-2, -1, 0, 1, 2]; }
+
 
   export let labels = {
     first: "First",
@@ -35,7 +38,7 @@
 	  };
  }
 
-  $: pageCount = Math.floor(count / pageSize);
+  $: pageCount = Math.floor((count-1) / pageSize);
 
   function onChange(event, page) {
     const state = stateContext.getState();

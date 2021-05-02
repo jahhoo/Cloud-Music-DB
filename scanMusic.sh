@@ -5,6 +5,7 @@
 
 bpmAnalyze=false
 setChmode=false
+renameFiles=true
 musicdir='music'
 dbFile='db.json'
 
@@ -14,16 +15,18 @@ dbFile='db.json'
 first=true
 SOURCE=`pwd`
 dbFile=$SOURCE"/"$dbFile
-cd $musicdir
 rm -f $dbFile
 
 analyze() {
 	for f in *; do 
 	  filetype=`file -b --mime-type "$f" `
 	  if [ "$filetype" == "audio/mpeg" ] || [ "$filetype" == "audio/x-m4a" ]; then
-	  	if $setChmode ; chmod 775 "$f" ; fi
-		if $bpmAnalyze ; then bpm-tag "$f" ; fi
-		metadata=`exiftool -Title -Artist -Genre -BeatsPerMinute -Duration -DateTimeOriginal -ContentCreateDate -FileModifyDate -json "$f"`
+	  	newName="$f"
+	  	if $renameFiles; then newName="${f/'  '/' '}"; fi
+	  	if [ "$f" != "$newName" ]; then mv "$f" "$newName"; fi
+	  	if $setChmode ; then chmod 666 "$newName"; fi
+		if $bpmAnalyze ; then bpm-tag "$newName" ; fi
+		metadata=`exiftool -Title -Artist -Genre -BeatsPerMinute -Duration -DateTimeOriginal -ContentCreateDate -FileModifyDate -json "$newName"`
 		json="${metadata/$musicdir/''}"
 		thisFolder=`pwd`
 		thisFolder="${thisFolder/$SOURCE/''}"
@@ -57,7 +60,7 @@ listFolder() {
 	done
 }
 
-
+cd $musicdir
 echo "[" >> $dbFile
 analyze
 listFolder

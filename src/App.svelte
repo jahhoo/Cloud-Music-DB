@@ -100,9 +100,12 @@
   }
   
   function date(d) {
-  	let d2=d.split(" ");
-  	let d3=d2[0].split(":");
-  	return d3[2]+"."+d3[1]+"."+d3[0];
+  	if(d) {
+	  	let d2=d.split(" ");
+	  	let d3=d2[0].split(":");
+	  	return d3[2]+"."+d3[1]+"."+d3[0];
+	}
+	return "";
   }
  
  function getTitle(t,f) {
@@ -124,9 +127,21 @@
  
  function getYear(y, CreateDate) {
  	if(typeof y==="undefined" || !y || y=="NaN") { 
- 		if(CreateDate) { 
- 			let cd=CreateDate.split(":");
- 			return cd[0];
+ 		if(CreateDate && typeof CreateDate!=="undefined" && CreateDate!="NaN") { 
+ 			if(Number.isInteger(CreateDate)) {
+ 				return CreateDate;
+ 			} else if(CreateDate.includes(":")) {
+	 			let cd=CreateDate.split(":");
+	 			return cd[0];
+	 		} else if(CreateDate.includes("/")) {
+	 			let cd=CreateDate.split("/");
+	 			return cd[0];
+	 		} else if(CreateDate.includes(".")) {
+	 			let cd=CreateDate.split(".");
+	 			if(cd.count>=3) { return cd[2]; }
+	 			return cd[0];
+	 		}
+	 		return CreateDate;
  		}
  		return ""; 
  	}
