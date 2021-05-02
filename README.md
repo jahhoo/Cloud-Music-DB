@@ -8,7 +8,7 @@ A simple MP3 Database which not required complicated installation
 Copy this software to the *Web server root dir* and upload music or create a symlink to the **music** folder
 
 ## Creating a music database
-You have to run it in Linux bash and you have to installed **exiftool**
+Before run script, you have to installed **exiftool**. Then you can run the script to create a database.
 > ./scanMusic.sh
 
 *You can run this script with a cron*
