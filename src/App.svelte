@@ -5,6 +5,7 @@
   import Table, { Pagination, Row, Search, Sort } from "./Table.svelte";
   import Limit from "./Limit.svelte";
   import RangeSlider from "./RangeSlider.svelte";
+  import FolderBrowser from "./FolderBrowser.svelte";
   import Player from "./Player.svelte";
   import { getData } from "./server.js";
   import { sortNumber, sortString, sortBPM } from "./sorting.js";
@@ -15,7 +16,9 @@
   let rows = [];
   let page = 0;
   let pageIndex = 0;
-  let pageSize = 20; 
+  let pageSize = 25; 
+  export let enableFolders=[];
+  export let allFolders=false;
 
   let loading = true;
   let rowsCount = 0;
@@ -23,6 +26,10 @@
   let sorting;
   export let bpmFrom=false;
   export let bpmTo=false;
+  export let yearMin;
+  export let yearMax;
+  export let yearFrom=false;
+  export let yearTo=false;
   
   export let musicFolder="music";
   export let musicDb="db.json";
@@ -43,9 +50,12 @@
    async function load(_page) {
     loading = true;
     if(loadData) {
-	    const data = await getData(loadData, _page, pageSize, text, sorting, bpmFrom, bpmTo);
+	    const data = await getData(loadData, _page, pageSize, text, sorting, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders);
 	    rows = data.rows;
+	    allFolders = data.allFolders;
 	    rowsCount = data.rowsCount;
+	    yearMin = data.yearMin;
+	    yearMax = data.yearMax;
 	    loading = false;
     }
   }
@@ -147,13 +157,22 @@
  	}
  	return parseInt(y);
  }
+ 
+ export let labels = {
+	    year: "year"
+  };
+  if(document.documentElement.lang=="cs") {
+	  labels = {
+	    year: "Rok"
+	  };
+  }
   
 onMount(() => {
 	init();
 });
 
 $: {
-	load(page, loadData, pageSize, bpmFrom, bpmTo);
+	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders);
 }
 
 let tableHeader=[];
@@ -166,8 +185,12 @@ if(document.documentElement.lang=="cs") {
 <Table {loading} {rows} {pageIndex} {pageSize} let:rows={rows2}>
   <div slot="top">
     <Limit bind:limit={pageSize} />
-    <Search on:search={onSearch} />
+    <FolderBrowser bind:allFolders bind:enableFolders />
+    {#if yearMin && yearMin!=yearMax}
+    	<RangeSlider min={yearMin} bind:max={yearMax} bind:valueFrom={yearFrom} bind:valueTo={yearTo} title={labels.year} />
+    {/if}
     <RangeSlider min=70 max=180 bind:valueFrom={bpmFrom} bind:valueTo={bpmTo} title="BPM" />
+    <Search on:search={onSearch} />
   </div>
   <thead slot="head">
     <tr>
@@ -214,27 +237,27 @@ if(document.documentElement.lang=="cs") {
       		{/if}
       		<div class="icon"><a href="{getLink(row.SourceFile, row.Folder)}" download><IoMdDownload /></a></div>
       		</div>
-      		<br>
+      		<br />
       	</td>
-	<td data-label="{tableHeader['title']}" on:click={() => play(row.SourceFile, row.Folder, row.Title, row.Artist)} style="cursor:pointer;">{getTitle(row.Title, row.SourceFile)}</td>
-	<td data-label="{tableHeader['artist']}">
+	<td data-label="{tableHeader['title']}" on:click={() => play(row.SourceFile, row.Folder, row.Title, row.Artist, index)} style="cursor:pointer;">{getTitle(row.Title, row.SourceFile)}</td>
+	<td data-label="{tableHeader['artist']}">&nbsp;
 		{#if row.Artist && typeof row.Artist!=="undefined"}
 			{row.Artist}
 		{/if}
 	</td>
-	<td data-label="BPM">{getBPM(row.BeatsPerMinute)}</td>
-	<td data-label="{tableHeader['genre']}">
+	<td data-label="BPM">&nbsp;{getBPM(row.BeatsPerMinute)}</td>
+	<td data-label="{tableHeader['genre']}">&nbsp;
 		{#if typeof row.Genre !=="undefined" && row.Genre && row.Genre!="None"} 
 			{row.Genre}
 		{/if}
 	</td>
-	<td data-label="{tableHeader['duration']}">
+	<td data-label="{tableHeader['duration']}">&nbsp;
 		{#if typeof row.Duration !=="undefined" && row.Duration} 
 			{row.Duration.replace(" (approx)", "")}
 		{/if}
 	</td>
-	<td data-label="{tableHeader['year']}">{getYear(row.DateTimeOriginal, row.ContentCreateDate)}</td>
-	<td data-label="{tableHeader['date']}">{date(row.FileModifyDate)}</td>
+	<td data-label="{tableHeader['year']}">&nbsp;{getYear(row.DateTimeOriginal, row.ContentCreateDate)}</td>
+	<td data-label="{tableHeader['date']}">&nbsp;{date(row.FileModifyDate)}</td>
       </Row>
     {/each}
   </tbody>
@@ -249,11 +272,10 @@ if(document.documentElement.lang=="cs") {
 th { min-width:48px; }
 .actionTh { width:90px; }
 
-  @media screen and (max-width: 767px) {
+@media screen and (max-width: 767px) {
     .action {
-      min-height:30px;
+      min-height:35px;
     }
     .actionTh { width:auto; }
-
  }
 </style>

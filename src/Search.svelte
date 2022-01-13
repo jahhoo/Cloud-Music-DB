@@ -11,8 +11,12 @@
   const dispatch = createEventDispatcher();
   const stateContext = getContext("state");
 
+
+  function toLower(t) {
+  	return t.replaceAll("A","a");
+  }
+
   export let filter = (row, text, index) => {
-    text = text.toLowerCase();
     for (let i in row) {
       if (
         row[i]
@@ -59,7 +63,7 @@
         stateContext.setRows(state.rows);
       } else {
         stateContext.setRows(
-          detail.rows.filter(r => detail.filter(r, detail.text, index))
+          detail.rows.filter(r => detail.filter(r, toLower(detail.text), index))
         );
       }
       stateContext.setPage(0, 0);
@@ -72,6 +76,7 @@
 <style>
   .search {
     width: 33.3%;
+    max-width: 400px;
     float: right;
   }
   .search input {

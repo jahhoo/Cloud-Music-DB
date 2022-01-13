@@ -40,7 +40,7 @@
 		text-align: center;
 		padding: 0 3em 1em 1em;
 		width: 270px;
-		margin: -2px auto 10px auto;
+		margin: -2px 2px 10px 10px;
 	}
 	.label:first-child {
 		float: left;

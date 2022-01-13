@@ -3,6 +3,7 @@
 	import keyboard from './keyboard';
 	import format from './format';
 	import IoMdDownload from 'svelte-icons/io/IoMdDownload.svelte'
+	import Notification from './Notification.svelte';
 	
 	let duration;
 	let muted = false;
@@ -16,6 +17,7 @@
 	export let IndexPlayed=-1;
 	export let rows=false;
 	export let musicFolder="";
+	export let notification="";
 	
 	let labelPlay="Play";
 	let labelStop="Stop";
@@ -34,9 +36,11 @@
 		'ArrowRight': e => currentTime += 5,
 		'Space': () => pauseOrPlay(),
 		'KeyO': () => paused = false,
-		'KeyP': () => paused = true,
+		'KeyP': () => pauseOrPlay(),
 		'KeyM': () => muted = !muted,
+		'KeyB': () => previousSong(),
 		'KeyN': () => nextSong(),
+		'KeyA': () => plusMinute(),
 	};
 	
 	function plusMinute() {
@@ -55,6 +59,23 @@
 	function nextSong() {
 		IndexPlayed+=1;
 		currentTime=0;
+		if(rows.length>IndexPlayed) {
+			let fol=rows[IndexPlayed]['Folder'];
+			if(fol) { fol+="/"; }
+			File=musicFolder+"/"+fol+rows[IndexPlayed]['SourceFile'];
+			Title=getTitle(rows[IndexPlayed]['Title'],rows[IndexPlayed]['SourceFile']);
+			Artist=rows[IndexPlayed]['Artist'];
+		} else if(document.documentElement.lang=="cs") {
+			notification="V playlistu již nejsou další skladby!";
+		} else {
+			notification="There aren't more songs!";
+		}
+	}
+	
+	function previousSong() {
+		IndexPlayed-=1;
+		currentTime=0;
+		if(IndexPlayed<0) { IndexPlayed=0; }
 		let fol=rows[IndexPlayed]['Folder'];
 		if(fol) { fol+="/"; }
 		File=musicFolder+"/"+fol+rows[IndexPlayed]['SourceFile'];
@@ -74,11 +95,29 @@
 		paused=false;
 		setTimeout(function(){ paused=true; }, 50);
 	}
+    
 $: {
 	if(duration && duration>1 && currentTime>=duration && IndexPlayed!=-1 && rows) {
 		nextSong();
 	}
 }
+  let handler;
+  const removeHandlerPrevious = () => navigator.mediaSession.setActionHandler('previoustrack', handler), setHandlerPrevious = () => {
+        removeHandlerPrevious();
+        handler = (e) => {  
+        	previousSong();
+        };
+        navigator.mediaSession.setActionHandler('previoustrack', handler);
+    };
+    setHandlerPrevious();
+  const removeHandlerNext = () => navigator.mediaSession.setActionHandler('nexttrack', handler), setHandlerNext = () => {
+        removeHandlerNext();
+        handler = (e) => {  
+        	nextSong();
+        };
+        navigator.mediaSession.setActionHandler('nexttrack', handler);
+    };
+    setHandlerNext();
 </script>
 
 <audio
@@ -136,6 +175,7 @@ $: {
 		<Slider max={1} min={0} step={0.01} current={volume} on:change={e => volume = e.detail.value}  />
 	</div>
 </div>
+<Notification bind:notification />
 
 
 <style>
@@ -170,6 +210,7 @@ $: {
 	}
 	
 	.song-slider {
+		width:10%;
 		min-width:200px;
 		max-width:350px;
 	}
@@ -197,7 +238,9 @@ $: {
 	.icon { width:45px; float:left; padding-right:10px; }
 	
 	@media screen and (max-width: 767px) {
-		.logo, .plusMinute, .song-slider, .volume { display:none; }
-		.player-container { height: 110px; }
+		.logo, .icon, .song-slider, .volume { display:none; }
+		.player-container { height: 130px; }
+		.song-info { min-width:280px; font-size:90%; }
+		.buttons { min-width:85px; }
 	}
 </style>

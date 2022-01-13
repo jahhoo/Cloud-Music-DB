@@ -1,7 +1,7 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
-  "private": true,
+  "name": "NAS-Music-DB",
+  "version": "1.1.0",
+  "private": false,
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
@@ -15,13 +15,15 @@
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.0.0",
     "rollup-plugin-terser": "^7.0.0",
-    "svelte": "^3.0.0",
+    "svelte": "^3.46.1",
+    "svelte-mui": "^0.3.3-7",
     "svelte-range-slider-pips": "^1.7.0"
   },
   "dependencies": {
     "sirv-cli": "^1.0.0",
     "svelte-icons": "^2.1.0",
     "svelte-loading-spinners": "^0.1.4",
+    "svelte-notifications": "^0.9.93",
     "yootils": "^0.2.0"
   }
 }

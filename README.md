@@ -5,10 +5,16 @@ A simple MP3 Database which not required complicated installation
 
 
 ## Instalation
-Copy this software to the *Web server root dir* and upload music or create a symlink to the **music** folder
+Install Apache on your server 
+>  sudo apt-get install apache2
+
+Then Copy this Application to the *Web server root dir* (*/var/www*) and upload music or create a symlink to a folder named **"music"**
 
 ## Creating a music database
-Before run script, you have to installed **exiftool**. Then you can run the script to create a database.
+Before run script, you have to installed **exiftool**. 
+> sudo apt-get install exiftool
+
+Then you can run the script to create a database.
 > ./scanMusic.sh
 
-*You can run this script with a cron*
+*You can run it regularly with a cron.*

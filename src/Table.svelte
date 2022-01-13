@@ -44,7 +44,7 @@
   }
 
   let buttons = [-2, -1, 0, 1, 2];
-  let pageCount = 0;
+  let pageCount = 0;  
 
   $: filteredRows = rows;
   $: visibleRows = filteredRows.slice(pageIndex, pageIndex + pageSize);
@@ -79,11 +79,11 @@
     border-collapse: collapse;
   }
 
-  .table :global(th, td) {
+  .table :global(th), .table :global(td) {
     position: relative;
   }
 
-  .table :global(td) {
+  .table td {
     padding: 0.3em 0.3em;
   }
 
