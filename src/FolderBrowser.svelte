@@ -43,7 +43,7 @@
 
 <div class="buttonBrowser"><Button color="primary" raised on:click={() => (visible=true)}>{labels.folders}</Button></div>
 
-<Dialog width="550" bind:visible>
+<Dialog width="600" bind:visible>
     <div slot="title">{labels.selectFolders}</div>
 	{#if Array.isArray(allFolders)}
 		{#each getFolders() as fol}

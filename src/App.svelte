@@ -2,6 +2,7 @@
 //NAS Music DB
 //Author Jan Holomek (jahhoo@gmail.com)
   import { onMount } from "svelte";
+  import { writable } from 'svelte/store'
   import Table, { Pagination, Row, Search, Sort } from "./Table.svelte";
   import Limit from "./Limit.svelte";
   import RangeSlider from "./RangeSlider.svelte";
@@ -12,6 +13,10 @@
   import IoIosPlayCircle from 'svelte-icons/io/IoIosPlayCircle.svelte'
   import IoMdDownload from 'svelte-icons/io/IoMdDownload.svelte'
   import IoMdPause from 'svelte-icons/io/IoMdPause.svelte'
+  import AddToFavorites from './AddToFavorites.svelte';
+  import DownloadFavorites from './DownloadFavorites.svelte';
+  import IoIosHeart from 'svelte-icons/io/IoIosHeart.svelte'
+  import IoIosHeartEmpty from 'svelte-icons/io/IoIosHeartEmpty.svelte'
 
   let rows = [];
   let page = 0;
@@ -30,6 +35,7 @@
   export let yearMax;
   export let yearFrom=false;
   export let yearTo=false;
+  export let filteredFavorites=false;
   
   export let musicFolder="music";
   export let musicDb="db.json";
@@ -39,8 +45,10 @@
   export let File="";
   export let IndexPlayed=-1;
   export let paused=false;
-  let loadData;
-  
+  let loadData; 
+  export let favorites=[];
+  if(localStorage.favorites) { favorites=Object.values(JSON.parse(localStorage.favorites)); }
+  export let needUpdate=false;
  
   async function init() {
   	let loadFetch = await fetch(musicDb);
@@ -50,7 +58,7 @@
    async function load(_page) {
     loading = true;
     if(loadData) {
-	    const data = await getData(loadData, _page, pageSize, text, sorting, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders);
+	    const data = await getData(loadData, _page, pageSize, text, sorting, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, favorites, filteredFavorites, musicFolder);
 	    rows = data.rows;
 	    allFolders = data.allFolders;
 	    rowsCount = data.rowsCount;
@@ -58,6 +66,7 @@
 	    yearMax = data.yearMax;
 	    loading = false;
     }
+    needUpdate=false;
   }
 
   function onCellClick(row) {
@@ -157,7 +166,18 @@
  	}
  	return parseInt(y);
  }
- 
+   
+onMount(() => {
+	init();
+});
+
+$: {
+	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, filteredFavorites);
+	if(needUpdate) { needUpdate=false; }
+}
+
+ let tableHeader=[];
+ tableHeader['action']="Action"; tableHeader['title']="Title"; tableHeader['artist']="Artist"; tableHeader['genre']="Genre"; tableHeader['duration']="Duration"; tableHeader['year']="Year"; tableHeader['date']="Downloaded";
  export let labels = {
 	    year: "year"
   };
@@ -165,27 +185,19 @@
 	  labels = {
 	    year: "Rok"
 	  };
+	  tableHeader['action']="Akce"; tableHeader['title']="Název"; tableHeader['artist']="Interpret"; tableHeader['genre']="Žánr"; tableHeader['duration']="Délka"; tableHeader['year']="Rok"; tableHeader['date']="Nahráno";
   }
-  
-onMount(() => {
-	init();
-});
-
-$: {
-	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders);
-}
-
-let tableHeader=[];
-tableHeader['action']="Action"; tableHeader['title']="Title"; tableHeader['artist']="Artist"; tableHeader['genre']="Genre"; tableHeader['duration']="Duration"; tableHeader['year']="Year"; tableHeader['date']="Downloaded";
-if(document.documentElement.lang=="cs") {
-	tableHeader['action']="Akce"; tableHeader['title']="Název"; tableHeader['artist']="Interpret"; tableHeader['genre']="Žánr"; tableHeader['duration']="Délka"; tableHeader['year']="Rok"; tableHeader['date']="Nahráno";
-}
 </script>
 
 <Table {loading} {rows} {pageIndex} {pageSize} let:rows={rows2}>
   <div slot="top">
     <Limit bind:limit={pageSize} />
     <FolderBrowser bind:allFolders bind:enableFolders />
+    {#if filteredFavorites}
+	<span class="icon iconHeart" on:click={() => filteredFavorites=false}><IoIosHeart /></span>
+    {:else}
+	<span class="icon iconHeart" on:click={() => filteredFavorites=true}><IoIosHeartEmpty /></span>
+    {/if}
     {#if yearMin && yearMin!=yearMax}
     	<RangeSlider min={yearMin} bind:max={yearMax} bind:valueFrom={yearFrom} bind:valueTo={yearTo} title={labels.year} />
     {/if}
@@ -236,6 +248,7 @@ if(document.documentElement.lang=="cs") {
       			<div class="icon" on:click={() => play(row.SourceFile, row.Folder, row.Title, row.Artist, index)}><IoIosPlayCircle /></div>
       		{/if}
       		<div class="icon"><a href="{getLink(row.SourceFile, row.Folder)}" download><IoMdDownload /></a></div>
+      		<div class="icon"><AddToFavorites url={getLink(row.SourceFile, row.Folder)} bind:favorites /></div>
       		</div>
       		<br />
       	</td>
@@ -262,20 +275,25 @@ if(document.documentElement.lang=="cs") {
     {/each}
   </tbody>
   <div slot="bottom">
-    <Pagination {page} {pageSize} count={rowsCount} serverSide={true} on:pageChange={onPageChange} />
+    <Pagination bind:page {pageSize} count={rowsCount} serverSide={true} on:pageChange={onPageChange} />
+    {#if favorites}
+    	<DownloadFavorites bind:favorites bind:needUpdate bind:filteredFavorites />
+    {/if}
   </div>
 </Table>
-<Player bind:Title bind:Artist bind:File bind:paused bind:IndexPlayed bind:rows {musicFolder} />
+<Player bind:Title bind:Artist bind:File bind:paused bind:IndexPlayed bind:rows {musicFolder} bind:favorites bind:needUpdate />
 
 <style>
 .icon { width:30px; float:left; padding-right:10px; }
+.iconHeart { color:#bb4551; float:right; position:relative; right:12px; }
 th { min-width:48px; }
-.actionTh { width:90px; }
+.actionTh { width:120px; }
 
 @media screen and (max-width: 767px) {
     .action {
       min-height:35px;
     }
+    .iconHeart { right:0px; }
     .actionTh { width:auto; }
  }
 </style>

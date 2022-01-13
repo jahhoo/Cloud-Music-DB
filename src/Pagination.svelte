@@ -39,6 +39,7 @@
  }
 
   $: pageCount = Math.floor((count-1) / pageSize);
+  $: if(page>pageCount && pageCount>=0) { page=pageCount; }
 
   function onChange(event, page) {
     const state = stateContext.getState();

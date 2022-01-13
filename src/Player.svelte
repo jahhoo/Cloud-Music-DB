@@ -4,6 +4,7 @@
 	import format from './format';
 	import IoMdDownload from 'svelte-icons/io/IoMdDownload.svelte'
 	import Notification from './Notification.svelte';
+	import AddToFavorites from './AddToFavorites.svelte';
 	
 	let duration;
 	let muted = false;
@@ -18,6 +19,8 @@
 	export let rows=false;
 	export let musicFolder="";
 	export let notification="";
+	export let favorites;
+	export let needUpdate;
 	
 	let labelPlay="Play";
 	let labelStop="Stop";
@@ -171,6 +174,11 @@ $: {
 			<a href="{File}" download><IoMdDownload /></a>
 		{/if}
 	</div>
+	<div class="icon">
+		{#if File}
+			<AddToFavorites bind:url={File} bind:favorites bind:needUpdate />
+		{/if}
+	</div>
 	<div class="volume">
 		<Slider max={1} min={0} step={0.01} current={volume} on:change={e => volume = e.detail.value}  />
 	</div>
@@ -242,5 +250,10 @@ $: {
 		.player-container { height: 130px; }
 		.song-info { min-width:280px; font-size:90%; }
 		.buttons { min-width:85px; }
+	}
+	
+	@media screen and (max-width: 1280px) {
+		.volume { display:none; }
+		.player-container { height: 90px; }
 	}
 </style>

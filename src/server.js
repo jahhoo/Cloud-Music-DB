@@ -1,6 +1,6 @@
 import { sortNumber, sortString, sortBPM } from "./sorting.js";
 
-export function getData(data, page, pageSize, text, sorting, bpmFrom=false, bpmTo=false, yearFrom=false, yearTo=false, enableFolders=[]) {
+export function getData(data, page, pageSize, text, sorting, bpmFrom=false, bpmTo=false, yearFrom=false, yearTo=false, enableFolders=[], favorites, filteredFavorites=false, musicFolder="music") {
   let originalData = data;
 
   if (sorting) {
@@ -11,6 +11,12 @@ export function getData(data, page, pageSize, text, sorting, bpmFrom=false, bpmT
     } else {
       originalData = sortString(data, sorting.dir, sorting.key);
     }
+  }
+ 
+  function getLink(f,fol) {
+  	if(fol && typeof fol!=="undefined" && fol!="NaN") { fol+="/"; }
+  	else { fol=""; }
+  	return musicFolder+"/"+fol+f;
   }
 
   return new Promise((resolve, reject) => {
@@ -25,8 +31,8 @@ export function getData(data, page, pageSize, text, sorting, bpmFrom=false, bpmT
 	for (let i in originalRows) {
 		let year=parseInt(originalRows[i]['DateTimeOriginal']);
 		//years
-		if(year>yearMax) { yearMax=year; }
-		if(year<yearMin) { yearMin=year; }
+		if(year>yearMax && year<2100) { yearMax=year; }
+		if(year<yearMin && year>1920) { yearMin=year; }
 		//allFolders
 		let fl=originalRows[i]['Folder'];
    		if(fl=="") { fl="/"; }
@@ -57,6 +63,10 @@ export function getData(data, page, pageSize, text, sorting, bpmFrom=false, bpmT
 	   		let fl=originalRows[i]['Folder'];
 			if(fl=="") { fl="/"; }
 			if(!enableFolders.includes(fl)) { ok=false; }	  		
+	   	}
+	   	//filterFavories
+	   	if(filteredFavorites) {
+	   		if(!favorites.includes(getLink(originalRows[i]['SourceFile'], originalRows[i]['Folder']))) { ok=false; }
 	   	}
 	   	
 	   	if(ok) {rows.push(originalRows[i]);}
