@@ -7,6 +7,7 @@
   import Limit from "./Limit.svelte";
   import RangeSlider from "./RangeSlider.svelte";
   import FolderBrowser from "./FolderBrowser.svelte";
+  import GenreBrowser from "./GenreBrowser.svelte";
   import Player from "./Player.svelte";
   import { getData } from "./server.js";
   import { sortNumber, sortString, sortBPM } from "./sorting.js";
@@ -23,7 +24,9 @@
   let pageIndex = 0;
   let pageSize = 25; 
   export let enableFolders=[];
+  export let enableGenres=[];
   export let allFolders=false;
+  export let allGenres=false;
 
   let loading = true;
   let rowsCount = 0;
@@ -58,9 +61,10 @@
    async function load(_page) {
     loading = true;
     if(loadData) {
-	    const data = await getData(loadData, _page, pageSize, text, sorting, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, favorites, filteredFavorites, musicFolder);
+	    const data = await getData(loadData, _page, pageSize, text, sorting, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, enableGenres, favorites, filteredFavorites, musicFolder);
 	    rows = data.rows;
 	    allFolders = data.allFolders;
+	    allGenres = data.allGenres;
 	    rowsCount = data.rowsCount;
 	    yearMin = data.yearMin;
 	    yearMax = data.yearMax;
@@ -172,7 +176,7 @@ onMount(() => {
 });
 
 $: {
-	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, filteredFavorites);
+	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, enableGenres, filteredFavorites);
 	if(needUpdate) { needUpdate=false; }
 }
 
@@ -185,7 +189,7 @@ $: {
 	  labels = {
 	    year: "Rok"
 	  };
-	  tableHeader['action']="Akce"; tableHeader['title']="Název"; tableHeader['artist']="Interpret"; tableHeader['genre']="Žánr"; tableHeader['duration']="Délka"; tableHeader['year']="Rok"; tableHeader['date']="Nahráno";
+	  tableHeader['action']="Akce"; tableHeader['title']="Název"; tableHeader['artist']="Umělec"; tableHeader['genre']="Žánr"; tableHeader['duration']="Délka"; tableHeader['year']="Rok"; tableHeader['date']="Nahráno";
   }
 </script>
 
@@ -193,6 +197,7 @@ $: {
   <div slot="top">
     <Limit bind:limit={pageSize} />
     <FolderBrowser bind:allFolders bind:enableFolders />
+    <GenreBrowser bind:allGenres bind:enableGenres />
     {#if filteredFavorites}
 	<span class="icon iconHeart" on:click={() => filteredFavorites=false}><IoIosHeart /></span>
     {:else}

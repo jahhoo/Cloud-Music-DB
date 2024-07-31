@@ -76,7 +76,7 @@
 <style>
   .search {
     width: 33.3%;
-    max-width: 400px;
+    max-width: 370px;
     float: right;
   }
   .search input {

@@ -5,12 +5,13 @@
 	import IoMdDownload from 'svelte-icons/io/IoMdDownload.svelte'
 	import Notification from './Notification.svelte';
 	import AddToFavorites from './AddToFavorites.svelte';
+	import InfoDialog from './InfoDialog.svelte';
 	
 	let duration;
 	let muted = false;
 	let currentTime = 0;
 	export let paused = false;
-	let volume = 0.75;
+	let volume = 0.80;
 	
 	export let Title="";
 	export let Artist="";
@@ -21,6 +22,8 @@
 	export let notification="";
 	export let favorites;
 	export let needUpdate;
+	
+	export let showInfo=false;
 	
 	let labelPlay="Play";
 	let labelStop="Stop";
@@ -138,7 +141,7 @@ $: {
 
 <div use:keyboard={{shortcut}} class="player-container" tabindex={0}>
 	<div class="song-info">
-		<img src="player.png" alt="{Title}" class="logo" width="100%" height="100%" />
+		<img src="player.png" alt="{Title}" class="logo" width="100%" height="100%" on:click="{()=>showInfo=true}" />
 		<div>
 			<h4>{Title}</h4>
 			<p>{Artist}</p>	
@@ -184,7 +187,7 @@ $: {
 	</div>
 </div>
 <Notification bind:notification />
-
+<InfoDialog bind:visible="{showInfo}" bind:data={rows[IndexPlayed]} />
 
 <style>
 	* {
@@ -246,7 +249,7 @@ $: {
 	.icon { width:45px; float:left; padding-right:10px; }
 	
 	@media screen and (max-width: 767px) {
-		.logo, .icon, .song-slider, .volume { display:none; }
+		.logo, .icon, .song-slider, .volume { display:none; cursor:pointer; }
 		.player-container { height: 130px; }
 		.song-info { min-width:280px; font-size:90%; }
 		.buttons { min-width:85px; }

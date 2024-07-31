@@ -3,8 +3,8 @@
 #This script creates a json database 
 #Author Jan Holomek (jahhoo@gmail.com)
 
-bpmAnalyze=false
-setChmode=false
+bpmAnalyze=true
+setChmode=true
 renameFiles=true
 musicdir='music'
 dbFile='db.json'
@@ -23,8 +23,8 @@ analyze() {
 	  if [ "$filetype" == "audio/mpeg" ] || [ "$filetype" == "audio/x-m4a" ]; then
 	  	newName="$f"
 	  	if $renameFiles; then newName="${f/'  '/' '}"; fi
-	  	if [ "$f" != "$newName" ]; then mv "$f" "$newName"; fi
-	  	if $setChmode ; then chmod 666 "$newName"; fi
+	  	if [ "$f" != "$newName" ]; then sudo mv "$f" "$newName"; fi
+	  	if $setChmode ; then sudo chmod 777 "$newName"; fi
 		if $bpmAnalyze ; then bpm-tag "$newName" ; fi
 		metadata=`exiftool -Title -Artist -Genre -BeatsPerMinute -Duration -DateTimeOriginal -ContentCreateDate -FileModifyDate -json "$newName"`
 		json="${metadata/$musicdir/''}"
