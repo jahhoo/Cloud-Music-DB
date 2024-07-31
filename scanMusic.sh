@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/bash
 #NAS Music DB
 #This script creates a json database 
 #Author Jan Holomek (jahhoo@gmail.com)
