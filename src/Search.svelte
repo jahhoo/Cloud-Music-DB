@@ -81,9 +81,9 @@
   }
   .search input {
     width: 100%;
-    border: 1px solid #eee;
+    border: 2px solid #eee;
     border-radius: 3px;
-    padding: 5px 3px;
+    padding: 8px 6px;
   }
 
   @media screen and (max-width: 767px) {

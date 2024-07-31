@@ -176,8 +176,8 @@ onMount(() => {
 });
 
 $: {
-	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, enableGenres, filteredFavorites);
-	if(needUpdate) { needUpdate=false; }
+	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, enableGenres, filteredFavorites, needUpdate);
+	//if(needUpdate) { needUpdate=false; }
 }
 
  let tableHeader=[];
@@ -196,13 +196,15 @@ $: {
 <Table {loading} {rows} {pageIndex} {pageSize} let:rows={rows2}>
   <div slot="top">
     <Limit bind:limit={pageSize} />
-    <FolderBrowser bind:allFolders bind:enableFolders />
-    <GenreBrowser bind:allGenres bind:enableGenres />
-    {#if filteredFavorites}
-	<span class="icon iconHeart" on:click={() => filteredFavorites=false}><IoIosHeart /></span>
-    {:else}
-	<span class="icon iconHeart" on:click={() => filteredFavorites=true}><IoIosHeartEmpty /></span>
-    {/if}
+    <div class="buttons">
+	    <FolderBrowser bind:allFolders bind:enableFolders />
+	    <GenreBrowser bind:allGenres bind:enableGenres />
+	    {#if filteredFavorites}
+		<span class="icon iconHeart" on:click={() => filteredFavorites=false}><IoIosHeart /></span>
+	    {:else}
+		<span class="icon iconHeart" on:click={() => filteredFavorites=true}><IoIosHeartEmpty /></span>
+	    {/if}
+    </div>
     {#if yearMin && yearMin!=yearMax}
     	<RangeSlider min={yearMin} bind:max={yearMax} bind:valueFrom={yearFrom} bind:valueTo={yearTo} title={labels.year} />
     {/if}
@@ -286,9 +288,10 @@ $: {
     {/if}
   </div>
 </Table>
-<Player bind:Title bind:Artist bind:File bind:paused bind:IndexPlayed bind:rows {musicFolder} bind:favorites bind:needUpdate />
+<Player bind:Title bind:Artist bind:File bind:paused bind:IndexPlayed bind:rows {musicFolder} bind:favorites bind:needUpdate bind:page {pageSize} {rowsCount} />
 
 <style>
+.buttons { display:inline; }
 .icon { width:30px; float:left; padding-right:10px; }
 .iconHeart { color:#bb4551; float:right; position:relative; right:12px; }
 th { min-width:48px; }
@@ -298,6 +301,7 @@ th { min-width:48px; }
     .action {
       min-height:35px;
     }
+    .buttons { float:right; }
     .iconHeart { right:0px; }
     .actionTh { width:auto; }
  }

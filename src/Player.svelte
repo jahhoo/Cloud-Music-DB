@@ -7,6 +7,11 @@
 	import AddToFavorites from './AddToFavorites.svelte';
 	import InfoDialog from './InfoDialog.svelte';
 	
+	import IoIosPlayCircle from 'svelte-icons/io/IoIosPlayCircle.svelte'
+  	import IoMdPause from 'svelte-icons/io/IoMdPause.svelte'
+  	import IoMdTimer from 'svelte-icons/io/IoMdTimer.svelte'
+	import IoIosSkipForward from 'svelte-icons/io/IoIosSkipForward.svelte'
+	
 	let duration;
 	let muted = false;
 	let currentTime = 0;
@@ -22,17 +27,29 @@
 	export let notification="";
 	export let favorites;
 	export let needUpdate;
+	export let needUpdatePlayer;
+	
+	export let page;
+	export let pageSize;
+	export let rowsCount;
 	
 	export let showInfo=false;
 	
 	let labelPlay="Play";
 	let labelStop="Stop";
 	let labelNext="Next";
+	let labelDownload="Download";
+	let labelFavorite="Add to Favorite";
+	let labelVolume="Volume";
+	
 	
 	if(document.documentElement.lang=="cs") {
 	 	labelPlay="Přehrát";
 		labelStop="Pozastavit";
 		labelNext="Další";
+		labelDownload="Stáhnout";
+		labelFavorite="Přidat k oblíbeným";
+		labelVolume="Hlasitost";
 	 }
 	
 	const shortcut = {
@@ -65,16 +82,26 @@
 	function nextSong() {
 		IndexPlayed+=1;
 		currentTime=0;
+		needUpdatePlayer=false;
+		if(rows.length<=IndexPlayed && (parseInt(page)+1)<parseInt(rowsCount)/parseInt(pageSize)) { 
+			page=parseInt(page)+1; 
+			needUpdate=true;
+			needUpdatePlayer=true;
+		}
+			
 		if(rows.length>IndexPlayed) {
 			let fol=rows[IndexPlayed]['Folder'];
 			if(fol) { fol+="/"; }
 			File=musicFolder+"/"+fol+rows[IndexPlayed]['SourceFile'];
 			Title=getTitle(rows[IndexPlayed]['Title'],rows[IndexPlayed]['SourceFile']);
 			Artist=rows[IndexPlayed]['Artist'];
-		} else if(document.documentElement.lang=="cs") {
-			notification="V playlistu již nejsou další skladby!";
-		} else {
-			notification="There aren't more songs!";
+		} 
+		if(parseInt(page)>=parseInt(rowsCount)/parseInt(pageSize)) { 
+			 if(document.documentElement.lang=="cs") {
+				notification="V playlistu již nejsou další skladby!";
+			} else {
+				notification="There aren't more songs!";
+			}
 		}
 	}
 	
@@ -106,6 +133,7 @@ $: {
 	if(duration && duration>1 && currentTime>=duration && IndexPlayed!=-1 && rows) {
 		nextSong();
 	}
+	if(needUpdatePlayer && !needUpdate) { IndexPlayed=-1; nextSong(); }
 }
   let handler;
   const removeHandlerPrevious = () => navigator.mediaSession.setActionHandler('previoustrack', handler), setHandlerPrevious = () => {
@@ -124,6 +152,7 @@ $: {
         navigator.mediaSession.setActionHandler('nexttrack', handler);
     };
     setHandlerNext();
+    
 </script>
 
 <audio
@@ -150,20 +179,12 @@ $: {
 	{#if File}
 		<div class="buttons">
 			{#if paused}
-				<button type="button" on:click={() => (paused=false)}>
-					{labelPlay}
-				</button>
+				<div class="icon" on:click={() => (paused=false)} title={labelPlay}><IoIosPlayCircle /></div>  
 			{:else}
-				<button type="button" on:click={pause}>
-					{labelStop}
-				</button>
+				<div class="icon" on:click={pause} title={labelStop}><IoMdPause /></div>
 			{/if}
-			<button type="button" on:click={plusMinute} class="plusMinute">
-				+ 1 min
-			</button>
-			<button type="button" on:click={nextSong}>
-				{labelNext}
-			</button>
+			<div class="icon" on:click={plusMinute} title="+1 min"><IoMdTimer /></div> 
+			<div class="icon" on:click={nextSong} title={labelNext}><IoIosSkipForward /></div> 
 		</div>
 	{/if}
 	{#if duration}
@@ -172,22 +193,24 @@ $: {
 			<span>{format(currentTime)} / {format(duration)}</span>
 		</div>
 	{/if}
-	<div class="icon">
+	<div class="icon iconExpand">
 		{#if File}
-			<a href="{File}" download><IoMdDownload /></a>
+			<a href="{File}" download title={labelDownload}><IoMdDownload /></a>
 		{/if}
 	</div>
-	<div class="icon">
+	<div class="icon iconExpand" title={labelFavorite}>
 		{#if File}
 			<AddToFavorites bind:url={File} bind:favorites bind:needUpdate />
 		{/if}
 	</div>
-	<div class="volume">
+	<div class="volume" title={labelVolume}>
 		<Slider max={1} min={0} step={0.01} current={volume} on:change={e => volume = e.detail.value}  />
 	</div>
 </div>
 <Notification bind:notification />
-<InfoDialog bind:visible="{showInfo}" bind:data={rows[IndexPlayed]} />
+{#if IndexPlayed>=0}
+	<InfoDialog bind:visible="{showInfo}" bind:data={rows[IndexPlayed]} />
+{/if}
 
 <style>
 	* {
@@ -215,7 +238,7 @@ $: {
 	
 	.song-info {
 		display: flex;
-		justify-content: space-between;
+		width:30%;
 		max-width:750px;
 		min-width:300px;
 	}
@@ -246,13 +269,14 @@ $: {
 		opacity: 0;
 	}
 	
-	.icon { width:45px; float:left; padding-right:10px; }
+	.icon { width:55px; float:left; padding-right:20px; color:#333; cursor:pointer; }
 	
 	@media screen and (max-width: 767px) {
-		.logo, .icon, .song-slider, .volume { display:none; cursor:pointer; }
+		.icon { width:45px; padding-right:10px; }
+		.logo, .iconExpand, .song-slider, .volume { display:none; cursor:pointer; }
 		.player-container { height: 130px; }
 		.song-info { min-width:280px; font-size:90%; }
-		.buttons { min-width:85px; }
+		.buttons { min-width:135px; }
 	}
 	
 	@media screen and (max-width: 1280px) {
