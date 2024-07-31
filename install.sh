@@ -14,7 +14,7 @@ sudo systemctl start apache2
 folder="musicdb"
 sudo mkdir -p /var/www/$folder
 cd /var/www/$folder
-sudo wget https://github.com/jahhoo/NAS-Music-DB/releases/download/v1.2.0/v1-2-0.zip
+sudo wget https://github.com/jahhoo/NAS-Music-DB/releases/download/v1.2.1/v1-2-1.zip
 sudo unzip v1-2-0.zip
 sudo rm v1-2-0.zip
 
