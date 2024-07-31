@@ -4,17 +4,28 @@ A simple MP3 Database which not required complicated installation
 ![Snímek z 2021-04-27 19-15-32](https://user-images.githubusercontent.com/33415849/116286995-2a324980-a790-11eb-97dd-9734f75ef0b7.png)
 
 
-## Instalation
-Install Apache on your server 
->  sudo apt-get install apache2
+## Instalation on Ubuntu / Debian / Raspbian
+Easy Install - run cmd on Linux
+>  wget https://raw.githubusercontent.com/jahhoo/NAS-Music-DB/main/install.sh && chmod +x ./install.sh && sudo ./install.sh
 
-Then Copy this Application to the *Web server root dir* (*/var/www*) and upload music or create a symlink to a folder named **"music"**
 
-## Creating a music database
-Before run script, you have to installed **exiftool**. 
-> sudo apt-get install exiftool
 
-Then you can run the script to create a database.
-> ./scanMusic.sh
+## Update a music database
+Run script:
+> sudo /var/www/musicdb/scanMusic.sh
 
-*You can run it regularly with a cron.*
+### Automatic update
+> crontab -e
+
+Insert and save
+> 0 3 * * 0 /var/www/musicdb/scanMusic.sh
+
+_Update DB every Sunday at 3:00_
+
+
+## Running Aplication
+[http://localhost/musicdb](http://localhost/musicdb)
+```
+Default Username: music
+Default Password: mymusicdb
+```
