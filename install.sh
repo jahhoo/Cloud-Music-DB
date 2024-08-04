@@ -2,6 +2,9 @@
 #NAS Music DB
 #Author Jan Holomek (jahhoo@gmail.com)
 
+tagVersion="v1.2.2"
+version="v1-2-2"
+
 # Update and install Apache2
 sudo apt update
 sudo apt install -y apache2 exiftool bpm-tools
@@ -14,9 +17,9 @@ sudo systemctl start apache2
 folder="musicdb"
 sudo mkdir -p /var/www/$folder
 cd /var/www/$folder
-sudo wget https://github.com/jahhoo/Cloud-Music-DB/releases/download/v1.2.1/v1-2-1.zip
-sudo unzip v1-2-0.zip
-sudo rm v1-2-0.zip
+sudo wget https://github.com/jahhoo/Cloud-Music-DB/releases/download/$tagVersion/$version.zip
+sudo unzip $version
+sudo rm $version
 
 # Prompt for username and password
 read -p "Enter username [default: music]: " username

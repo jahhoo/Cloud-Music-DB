@@ -8,14 +8,11 @@
 
 <script>
   import { createEventDispatcher, getContext } from "svelte";
-  const dispatch = createEventDispatcher();
+
   const stateContext = getContext("state");
+  const dispatch = createEventDispatcher();
 
-
-  function toLower(t) {
-  	return t.replaceAll("A","a");
-  }
-
+  // function Filter
   export let filter = (row, text, index) => {
     for (let i in row) {
       if (
@@ -29,6 +26,7 @@
     }
     return false;
   };
+
   export let index = -1;
   export let text = "";
 
@@ -36,35 +34,37 @@
     placeholder: "Search",
     ...globalLabels
   };
-  
-  if(document.documentElement.lang=="cs") {
- 	labels = {
-	    placeholder: "Prohledat",
-	    ...globalLabels
-	  };
- }
+
+  if (document.documentElement.lang == "cs") {
+    labels = {
+      placeholder: "Prohledat",
+      ...globalLabels
+    };
+  }
 
   async function onSearch(event) {
     const state = stateContext.getState();
+    const searchText = event.target.value.toLowerCase();
+
     const detail = {
       originalEvent: event,
       filter,
       index,
-      text,
+      text: searchText,
       page: state.page,
       pageIndex: state.pageIndex,
       pageSize: state.pageSize,
       rows: state.filteredRows
     };
+
     dispatch("search", detail);
 
     if (detail.preventDefault !== true) {
       if (detail.text.length === 0) {
         stateContext.setRows(state.rows);
       } else {
-        stateContext.setRows(
-          detail.rows.filter(r => detail.filter(r, toLower(detail.text), index))
-        );
+        const filteredRows = detail.rows.filter(r => detail.filter(r, detail.text, index));
+        stateContext.setRows(filteredRows);
       }
       stateContext.setPage(0, 0);
     } else {
@@ -73,9 +73,19 @@
   }
 </script>
 
+<div class="search">
+  <input
+    type="search"
+    title={labels.placeholder}
+    placeholder={labels.placeholder}
+    bind:value={text}
+    on:keyup={onSearch} />
+</div>
+
+
 <style>
   .search {
-    width: 33.3%;
+    width: 23vw;
     max-width: 370px;
     float: right;
   }
@@ -92,12 +102,3 @@
     }
   }
 </style>
-
-<div class="search">
-  <input
-    type="search"
-    title={labels.placeholder}
-    placeholder={labels.placeholder}
-    bind:value={text}
-    on:keyup={onSearch} />
-</div>

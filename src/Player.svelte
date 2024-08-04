@@ -169,8 +169,8 @@ $: {
 />
 
 <div use:keyboard={{shortcut}} class="player-container" tabindex={0}>
-	<div class="song-info">
-		<img src="player.png" alt="{Title}" class="logo" width="100%" height="100%" on:click="{()=>showInfo=true}" />
+	<div class="song-info" on:click="{()=>showInfo=true}">
+		<img src="player.png" alt="{Title}" class="logo" width="100%" height="100%" />
 		<div>
 			<h4>{Title}</h4>
 			<p>{Artist}</p>	
@@ -193,15 +193,17 @@ $: {
 			<span>{format(currentTime)} / {format(duration)}</span>
 		</div>
 	{/if}
-	<div class="icon iconExpand">
+	<div class="iconExpand">
+		<span class="icon">
 		{#if File}
 			<a href="{File}" download title={labelDownload}><IoMdDownload /></a>
 		{/if}
-	</div>
-	<div class="icon iconExpand" title={labelFavorite}>
+		</span>
+		<span class="icon" title={labelFavorite}>
 		{#if File}
 			<AddToFavorites bind:url={File} bind:favorites bind:needUpdate />
 		{/if}
+		</span>
 	</div>
 	<div class="volume" title={labelVolume}>
 		<Slider max={1} min={0} step={0.01} current={volume} on:change={e => volume = e.detail.value}  />
@@ -225,7 +227,7 @@ $: {
 		height: 75px;
 		padding: 5px;
 		display: flex;
-		justify-content: space-between;
+		justify-content: start;
 		align-items: center;
 		border-top: 1px solid #111;
 		background-color: #fff;
@@ -247,6 +249,7 @@ $: {
 		width:10%;
 		min-width:200px;
 		max-width:350px;
+		margin-left:10vw;
 	}
 	
 	h4, p {
@@ -269,18 +272,19 @@ $: {
 		opacity: 0;
 	}
 	
-	.icon { width:55px; float:left; padding-right:20px; color:#333; cursor:pointer; }
-	
-	@media screen and (max-width: 767px) {
-		.icon { width:45px; padding-right:10px; }
-		.logo, .iconExpand, .song-slider, .volume { display:none; cursor:pointer; }
-		.player-container { height: 130px; }
-		.song-info { min-width:280px; font-size:90%; }
-		.buttons { min-width:135px; }
-	}
+	.icon { width:55px; display:inline-block; padding-right:20px; color:#333; cursor:pointer; }
+	.iconExpand { margin-left: auto; margin-right:10vw; }
 	
 	@media screen and (max-width: 1280px) {
 		.volume { display:none; }
 		.player-container { height: 90px; }
+	}
+	
+	@media screen and (max-width: 767px) {
+		.player-container { height:130px; display:grid; justify-content: center; text-align:center; width:100%; }
+		.icon { width:45px; padding-right:10px; }
+		.logo, .iconExpand, .song-slider, .volume { display:none; cursor:pointer; }
+		.song-info { order: 2;  margin:auto; margin-top:8px; margin-bottom:12px; width:100%; min-width:auto; font-size:90%; }
+		.buttons { order: 1; margin:auto; text-align:center; width:100%; }
 	}
 </style>

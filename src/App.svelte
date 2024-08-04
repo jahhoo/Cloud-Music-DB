@@ -18,6 +18,7 @@
   import DownloadFavorites from './DownloadFavorites.svelte';
   import IoIosHeart from 'svelte-icons/io/IoIosHeart.svelte'
   import IoIosHeartEmpty from 'svelte-icons/io/IoIosHeartEmpty.svelte'
+  import IoIosFunnel from 'svelte-icons/io/IoIosFunnel.svelte'
 
   let rows = [];
   let page = 0;
@@ -52,6 +53,7 @@
   export let favorites=[];
   if(localStorage.favorites) { favorites=Object.values(JSON.parse(localStorage.favorites)); }
   export let needUpdate=false;
+  export let showFilter=true;
  
   async function init() {
   	let loadFetch = await fetch(musicDb);
@@ -113,8 +115,7 @@
 
   async function onSearch(event) {
     text = event.detail.text;
-    await load(page);
-		page = 0;
+    await load(0);
   }
 
   async function onSort(event) {
@@ -170,10 +171,20 @@
  	}
  	return parseInt(y);
  }
-   
-onMount(() => {
+ 
+ function isMobileDevice() {
+	return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/.test(navigator.userAgent);
+ }
+ 
+ function filtersDisplay(v) {
+ 	if(!v) { return "none"; }
+ 	return "inline";
+ }
+ 
+ onMount(() => {
 	init();
-});
+	if(isMobileDevice()) { showFilter=false; }
+ });
 
 $: {
 	load(page, loadData, pageSize, bpmFrom, bpmTo, yearFrom, yearTo, enableFolders, enableGenres, filteredFavorites, needUpdate);
@@ -195,22 +206,30 @@ $: {
 
 <Table {loading} {rows} {pageIndex} {pageSize} let:rows={rows2}>
   <div slot="top">
-    <Limit bind:limit={pageSize} />
-    <div class="buttons">
-	    <FolderBrowser bind:allFolders bind:enableFolders />
-	    <GenreBrowser bind:allGenres bind:enableGenres />
-	    {#if filteredFavorites}
-		<span class="icon iconHeart" on:click={() => filteredFavorites=false}><IoIosHeart /></span>
-	    {:else}
-		<span class="icon iconHeart" on:click={() => filteredFavorites=true}><IoIosHeartEmpty /></span>
-	    {/if}
-    </div>
-    {#if yearMin && yearMin!=yearMax}
-    	<RangeSlider min={yearMin} bind:max={yearMax} bind:valueFrom={yearFrom} bind:valueTo={yearTo} title={labels.year} />
+    {#if isMobileDevice()}
+    	<span class="icon iconHeart" on:click={() => showFilter=!showFilter} style="padding-top:12px;" title="Zobrazit filtry"><IoIosFunnel /></span>
     {/if}
-    <RangeSlider min=70 max=180 bind:valueFrom={bpmFrom} bind:valueTo={bpmTo} title="BPM" />
-    <Search on:search={onSearch} />
+    <div style="display:{filtersDisplay(showFilter)}">
+    	    <Limit bind:limit={pageSize} />
+	    <div class="buttons">
+		    <FolderBrowser bind:allFolders bind:enableFolders />
+		    <GenreBrowser bind:allGenres bind:enableGenres />
+		    {#if filteredFavorites}
+			<span class="icon iconHeart" on:click={() => filteredFavorites=false}><IoIosHeart /></span>
+		    {:else}
+			<span class="icon iconHeart" on:click={() => filteredFavorites=true}><IoIosHeartEmpty /></span>
+		    {/if}
+	    </div>
+	    {#if yearMin && yearMin!=yearMax}
+	    	<RangeSlider min={yearMin} bind:max={yearMax} bind:valueFrom={yearFrom} bind:valueTo={yearTo} title={labels.year} />
+	    {/if}
+	    <RangeSlider min=70 max=180 bind:valueFrom={bpmFrom} bind:valueTo={bpmTo} title="BPM" />
+	    <Search on:search={onSearch} />
+    </div>
   </div>
+  {#if isMobileDevice()}
+	<hr />
+  {/if}
   <thead slot="head">
     <tr>
       <th class="actionTh">&nbsp;</th>

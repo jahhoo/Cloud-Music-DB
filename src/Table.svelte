@@ -69,7 +69,9 @@
   }
 
   function onSearch(event) {
-    dispatch("search", event.detail);
+    const query = event.target.value.toLowerCase();
+    filteredRows = rows.filter(row => row.toLowerCase().includes(query));
+    dispatch("search", event.target.value);
   }
 </script>
 
@@ -140,9 +142,6 @@
     }
 
     table.responsive :global(td::before) {
-      /*
-	* aria-label has no advantage, it won't be read inside a table content: attr(aria-label);
-	*/
       content: attr(data-label);
       float: left;
       font-weight: bold;
